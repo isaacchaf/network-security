@@ -37,6 +37,25 @@ class DataValidation:
         except Exception as e:
             raise NetworkSecurityException(e, sys)
         
+
+    def validate_numerical_columns(self, dataframe:pd.DataFrame)->bool:
+        try:
+            numerical_columns=self._schema_config.get("numerical_columns", [])
+            # Check if each column is numeric in the dataframe
+            results = {col: pd.api.types.is_numeric_dtype(dataframe[col]) for col in numerical_columns if col in dataframe.columns}
+    
+            # Identify missing columns
+            missing_columns = [col for col in numerical_columns if col not in dataframe.columns]
+            if missing_columns:
+                logging.info(f"Warning: The following columns are listed in the schema but not found in the dataframe: {missing_columns}")
+                return False
+            else:
+                logging.info(f"Numeric columns prensent in dataframe")
+                return True
+        except Exception as e:
+            raise NetworkSecurityException(e,sys)
+
+        
     def detect_dataset_drift(self,base_df,current_df,threshold=0.05)->bool:
         try:
             status=True
@@ -83,6 +102,16 @@ class DataValidation:
             status=self.validate_number_of_columns(dataframe=test_dataframe)
             if not status:
                 error_message=f"Test dataframe does not contain all columns.\n"
+
+            # Validate numeric columns
+            status=self.validate_numerical_columns(dataframe=train_dataframe)
+            if not status:
+                error_message=f"Train dataframe does not contain all the numerical columns.\n"
+
+            status=self.validate_numerical_columns(dataframe=test_dataframe)
+            if not status:
+                error_message=f"Test dataframe does not contain all the numerical columns.\n"
+
 
             # Check datadrift
             status=self.detect_dataset_drift(base_df=train_dataframe,current_df=test_dataframe)
