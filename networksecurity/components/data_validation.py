@@ -48,9 +48,7 @@ class DataValidation:
         
         Returns:
         - bolean: Returns False if the numerical columns do no correspond to the schema .
-        """
-        
-        
+        """  
         try:
             output_value=True
             numerical_columns=self._schema_config.get("numerical_columns", [])
