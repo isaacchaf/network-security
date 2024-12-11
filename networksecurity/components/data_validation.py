@@ -39,11 +39,27 @@ class DataValidation:
         
 
     def validate_numerical_columns(self, dataframe:pd.DataFrame)->bool:
+        """
+        Validate if the columns listed as numerical in the schema are numeric in the dataframe.
+        
+        Parameters:
+        - dataframe (pd.DataFrame): The DataFrame to validate.
+        - schema_path (str): Path to the YAML schema file.
+        
+        Returns:
+        - bolean: Returns False if the numerical columns do no correspond to the schema .
+        """
+        
+        
         try:
+            output_value=True
             numerical_columns=self._schema_config.get("numerical_columns", [])
             # Check if each column is numeric in the dataframe
             results = {col: pd.api.types.is_numeric_dtype(dataframe[col]) for col in numerical_columns if col in dataframe.columns}
-    
+            for col, is_numeric in results.items():
+                if is_numeric == False:
+                    logging.info(f"Warning: The following column {col} is not numeric")
+                    output_value=False
             # Identify missing columns
             missing_columns = [col for col in numerical_columns if col not in dataframe.columns]
             if missing_columns:
@@ -51,7 +67,7 @@ class DataValidation:
                 return False
             else:
                 logging.info(f"Numeric columns prensent in dataframe")
-                return True
+                return output_value
         except Exception as e:
             raise NetworkSecurityException(e,sys)
 
