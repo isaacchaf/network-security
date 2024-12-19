@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Lint code
-        run: echo "Linting repository" # Replace with actual linting command
+        run: echo "Linting repository" # Replace with actual linting comman
       
       - name: Run unit tests
         run: echo "Running unit tests" # Replace with actual test command
@@ -83,10 +83,13 @@ jobs:
     
       - name: Run Docker Image to serve users
         run: |
-            docker run -d -p 8080:8080 --ipc="host" --name=networksecurity \
-              -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
-              -e AWS_REGION=${{ secrets.AWS_REGION }} \
-              $ECR_REGISTRY/$ECR_REPOSITORY:latest
+            run: |
+            docker run -d -p 8000:8000 --ipc="host" --name=networksecurity \
+                -e 'MONGO_DB_URL=${{ secrets.MONGO_DB_URL }}' \
+                -e 'AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}' \
+                -e 'AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}' \
+                -e 'AWS_REGION=${{ secrets.AWS_REGION }}' \
+                ${{ secrets.AWS_ECR_LOGIN_URI }}/${{ secrets.ECR_REPOSITORY_NAME }}:latest
       - name: Clean previous images and containers
         run: |
             docker system prune -f
